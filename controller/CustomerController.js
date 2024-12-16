@@ -38,11 +38,20 @@ const deletebyId = async(req,res)=>{
     }
 }
 
+const update = async(req,res)=>{
+    try{
+        const customer = await Customer.findByIdAndUpdate(req.params.id, req.body, {new:true});
+        res.status(201).json(customer)
+    }catch (e){
 
+        res.json(e)
+    }
+}
 
 module.exports = {
     findAll,
     save,
     findbyId,
-    deletebyId
+    deletebyId,
+    update
 }
