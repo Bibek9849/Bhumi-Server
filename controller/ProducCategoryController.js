@@ -19,9 +19,20 @@ const save = async (req, res) => {
     }
 }
 
+const findbyId = async (req, res) => {
+    try {
+        const category = await ProductCategory.findById(req.params.id);
+        res.status(200).json(category)
+    } catch (e) {
+
+        res.json(e)
+    }
+}
+
+
 
 module.exports = {
     findAll,
     save,
-
+    findbyId,
 }
