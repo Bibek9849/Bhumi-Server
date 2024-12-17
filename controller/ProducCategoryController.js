@@ -9,8 +9,19 @@ const findAll = async (req, res) => {
     }
 }
 
+const save = async (req, res) => {
+    try {
+        const category = new ProductCategory(req.body);
+        await category.save();
+        res.status(201).json(category)
+    } catch (e) {
+        res.json(e)
+    }
+}
 
 
 module.exports = {
     findAll,
+    save,
+
 }
