@@ -45,11 +45,20 @@ const deletebyId = async (req, res) => {
     }
 }
 
+const update = async (req, res) => {
+    try {
+        const users = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.status(201).json(users)
+    } catch (e) {
 
+        res.json(e)
+    }
+}
 
 module.exports = {
     findAll,
     save,
     findbyId,
     deletebyId,
+    update
 }
