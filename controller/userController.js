@@ -35,11 +35,21 @@ const findbyId = async (req, res) => {
         res.json(e)
     }
 }
+const deletebyId = async (req, res) => {
+    try {
+        const users = await User.findByIdAndDelete(req.params.id);
+        res.status(200).json("Data Deleted")
+    } catch (e) {
+
+        res.json(e)
+    }
+}
+
 
 
 module.exports = {
     findAll,
     save,
     findbyId,
-
+    deletebyId,
 }
