@@ -9,8 +9,24 @@ const findAll = async (req, res) => {
     }
 }
 
+const save = async (req, res) => {
+    try {
+        const { fullname, contact_no, address, password } = req.body
+        const users = new User({
+            fullname,
+            contact_no,
+            address,
+            password,
+            image: req.file.originalname
+        });
+        await users.save();
+        res.status(201).json(users)
+    } catch (e) {
+        res.json(e)
+    }
+}
 
 module.exports = {
     findAll,
-
+    save
 }
