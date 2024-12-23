@@ -26,7 +26,20 @@ const save = async (req, res) => {
     }
 }
 
+const findbyId = async (req, res) => {
+    try {
+        const users = await User.findById(req.params.id);
+        res.status(200).json(users)
+    } catch (e) {
+
+        res.json(e)
+    }
+}
+
+
 module.exports = {
     findAll,
-    save
+    save,
+    findbyId,
+
 }
