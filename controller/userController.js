@@ -1,9 +1,9 @@
-const User = require("../model/user");
+const Customer = require("../model/user");
 const { param } = require("../route/userRoute");
 const findAll = async (req, res) => {
     try {
-        const users = await User.find();
-        res.status(200).json(users);
+        const customers = await Customer.find();
+        res.status(200).json(customers);
     } catch (e) {
         res.json(e)
     }
@@ -12,15 +12,15 @@ const findAll = async (req, res) => {
 const save = async (req, res) => {
     try {
         const { fullname, contact_no, address, password } = req.body
-        const users = new User({
+        const customer = new Customer({
             fullname,
             contact_no,
             address,
             password,
             image: req.file.originalname
         });
-        await users.save();
-        res.status(201).json(users)
+        await customer.save();
+        res.status(201).json(customer)
     } catch (e) {
         res.json(e)
     }
@@ -28,8 +28,8 @@ const save = async (req, res) => {
 
 const findbyId = async (req, res) => {
     try {
-        const users = await User.findById(req.params.id);
-        res.status(200).json(users)
+        const customer = await Customer.findById(req.params.id);
+        res.status(200).json(customer)
     } catch (e) {
 
         res.json(e)
@@ -37,7 +37,7 @@ const findbyId = async (req, res) => {
 }
 const deletebyId = async (req, res) => {
     try {
-        const users = await User.findByIdAndDelete(req.params.id);
+        const customer = await Customer.findByIdAndDelete(req.params.id);
         res.status(200).json("Data Deleted")
     } catch (e) {
 
@@ -47,8 +47,8 @@ const deletebyId = async (req, res) => {
 
 const update = async (req, res) => {
     try {
-        const users = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.status(201).json(users)
+        const customer = await Customer.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.status(201).json(customer)
     } catch (e) {
 
         res.json(e)

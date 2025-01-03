@@ -19,5 +19,5 @@ const productTypeSchema = new mongoose.Schema({
     }
 })
 
-const productType = mongoose.model("product_type", productTypeSchema)
+const productType = mongoose.model("product_types", productTypeSchema)
 module.exports = productType;

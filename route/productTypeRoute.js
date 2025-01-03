@@ -1,5 +1,5 @@
 const express = require("express");
-const { findAll, save, findbyId, deletebyId, update } = require("../controller/ProductTypeController");
+const { findAll, save, findbyId, deletebyId, update } = require("../controller/productTypeController");
 const router = express.Router();
 
 const multer = require("multer")

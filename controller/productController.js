@@ -1,5 +1,5 @@
 const Product = require("../model/product");
-const { param } = require("../route/customerRoute");
+const { param } = require("../route/productRoute");
 const findAll = async (req, res) => {
     try {
         const product = await Product.find();

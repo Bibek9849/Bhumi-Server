@@ -2,16 +2,15 @@ const mongoose = require("mongoose")
 const productSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "customers"
+        ref: "users"
     },
     product_typeId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "product_type"
+        ref: "product_types"
     },
     price: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     quantity: {
         type: String,
@@ -19,5 +18,5 @@ const productSchema = new mongoose.Schema({
     }
 })
 
-const product = mongoose.model("product_type", productSchema)
+const product = mongoose.model("product", productSchema)
 module.exports = product;
