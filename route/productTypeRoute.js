@@ -1,23 +1,24 @@
-const mongoose = require("mongoose")
-const productTypeSchema = new mongoose.Schema({
-    product_categoryId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "product_category"
+const express = require("express");
+const { findAll, save, findbyId, deletebyId, update } = require("../controller/ProductTypeController");
+const router = express.Router();
+
+const multer = require("multer")
+const storage = multer.diskStorage({
+    destination: function (req, res, cb) {
+        cb(null, 'product_type_images')
     },
-    name: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    image: {
-        type: String,
-        required: true
-    },
-    description: {
-        type: String,
-        required: true
+    filename: function (req, file, cb) {
+        cb(null, file.originalname)
     }
 })
+const upload = multer({ storage })
 
-const productType = mongoose.model("product_type", productTypeSchema)
-module.exports = productType;
+
+router.get("/", findAll);
+router.post("/", upload.single('file'), save);
+router.get("/:id", findbyId)
+router.delete("/:id", deletebyId)
+router.put("/:id", update)
+
+
+module.exports = router;
