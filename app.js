@@ -7,6 +7,7 @@ const ProductRouter = require("./route/productRoute")
 const OrderRouter = require("./route/orderRoute")
 const OrderDetailRouter = require("./route/orderDetailRoute")
 const FeedbackRouter = require("./route/feedbackRoute")
+const PaymentRouter = require("./route/paymentRoute")
 
 
 const app = express();
@@ -21,6 +22,7 @@ app.use("/api/product", ProductRouter);
 app.use("/api/order", OrderRouter);
 app.use("/api/details", OrderDetailRouter);
 app.use("/api/feedback", FeedbackRouter);
+app.use("/api/payment", PaymentRouter);
 
 const port = 3000;
 app.listen(port, () => {
