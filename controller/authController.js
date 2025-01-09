@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = "5bc6e1b9a045d90e62bfb3989912628b2bf72abe6c6b73fa2c23be8cef25d70e";
-const Credential = require("../model/Credential");
+const SECRET_KEY = "d8044d3333d5b72d819c031e7a81570cd6dd478ddbbed18bd6cd060ba140ed9c";
+const Credential = require("../model/credential");
 const register = async (req, res) => {
     const { username, password, role } = req.body;
     const hashedpassword = await bcrypt.hash(password, 10);
@@ -18,7 +18,8 @@ const login = async (req, res) => {
         return res.status(403).send('Invalid username or password');
     }
 
-    const token = jwt.sign({ username: cred.username, role: cred.role }, SECRET_KEY, { expiresIn: '1h' })
+    const token = jwt.sign({ username: cred.username, role: cred.role },
+        SECRET_KEY, { expiresIn: '1h' })
     res.json({ token });
 
 

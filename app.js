@@ -8,6 +8,7 @@ const OrderRouter = require("./route/orderRoute")
 const OrderDetailRouter = require("./route/orderDetailRoute")
 const FeedbackRouter = require("./route/feedbackRoute")
 const PaymentRouter = require("./route/paymentRoute")
+const AuthRouter = require("./route/authRoute")
 
 
 const app = express();
@@ -23,6 +24,7 @@ app.use("/api/order", OrderRouter);
 app.use("/api/details", OrderDetailRouter);
 app.use("/api/feedback", FeedbackRouter);
 app.use("/api/payment", PaymentRouter);
+app.use("/api/auth", AuthRouter);
 
 const port = 3000;
 app.listen(port, () => {

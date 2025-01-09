@@ -4,7 +4,7 @@ const router = express.Router();
 
 const multer = require("multer");
 const UserValidation = require("../validation/userValidation");
-const { authenticateToken } = require("../security/auth");
+const { authenticateToken, authorizeRole } = require("../security/auth");
 
 const storage = multer.diskStorage({
     destination: function (req, res, cb) {
@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage })
 
 
-router.get("/", findAll);
+router.get("/", authenticateToken, authorizeRole("Admin"), findAll);
 router.post("/", upload.single('file'), save);
 router.get("/:id", findbyId)
 router.delete("/:id", deletebyId)
