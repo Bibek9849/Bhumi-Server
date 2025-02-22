@@ -11,7 +11,7 @@ const findAll = async (req, res) => {
 
 const save = async (req, res) => {
     try {
-        const category = new ProductCategory(req.body);
+        const category = new ProductCategory(req.body.data);
         await category.save();
         res.status(201).json(category)
     } catch (e) {
