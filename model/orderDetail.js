@@ -1,7 +1,7 @@
 const { date } = require("joi");
 const mongoose = require("mongoose")
 const orderDetailSchema = new mongoose.Schema({
-    userId: {
+    orderId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "orders"
     },
