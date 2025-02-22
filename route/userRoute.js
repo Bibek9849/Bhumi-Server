@@ -8,7 +8,7 @@ const { authenticateToken, authorizeRole } = require("../security/auth");
 
 const storage = multer.diskStorage({
     destination: function (req, res, cb) {
-        cb(null, 'user_images')
+        cb(null, 'uploads')
     },
     filename: function (req, file, cb) {
         cb(null, file.originalname)
@@ -17,8 +17,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage })
 
 
-router.get("/", authenticateToken, authorizeRole("Admin"), findAll);
-router.post("/", upload.single('file'), save);
+router.get("/", findAll);
+router.post("/save", upload.single('file'), save);
 router.get("/:id", findbyId)
 router.delete("/:id", deletebyId)
 router.put("/:id", update)

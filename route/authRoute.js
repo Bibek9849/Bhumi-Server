@@ -5,7 +5,7 @@ const { authenticateToken } = require("../security/auth");
 
 
 router.post("/login", login);
-router.post("/register", authenticateToken, register);
+router.post("/register", register);
 
 
 
