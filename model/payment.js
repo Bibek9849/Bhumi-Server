@@ -9,7 +9,6 @@ const paymentSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "product"
     },
-
     payment_method: {
         type: String,
         required: true

@@ -1,13 +1,26 @@
 const Detail = require("../model/orderDetail");
+const Order = require("../model/order");
+
 const { param } = require("../route/orderDetailRoute");
 const findAll = async (req, res) => {
     try {
-        const details = await Detail.find();
-        res.status(200).json(details);
-    } catch (e) {
-        res.json(e)
+        const details = await Detail.find()
+            .populate({
+                path: "orderId",
+                select: "status createdAt", // Fetch order status & created date
+            })
+            .populate({
+                path: "productID",
+                select: "name image", // Fetch product name & image
+            });
+
+        res.status(200).json({ success: true, data: details });
+    } catch (error) {
+        console.error("Error fetching order details:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
-}
+};
+
 
 const save = async (req, res) => {
     try {
