@@ -2,11 +2,138 @@ const asyncHandler = require("../middleware/async");
 const Student = require("../model/student");
 const path = require("path");
 const fs = require("fs");
-const student = require("../model/student");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
 
-// @desc    Get all students
-// @route   GET /api/v1/students
-// @access  Private
+
+
+
+exports.forgotPassword = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ msg: "Please enter your registered email" });
+  }
+
+  const student = await Student.findOne({ email });
+
+  if (!student) {
+    return res.status(400).json({ msg: "User with this email does not exist" });
+  }
+
+  // Fix: Use only `JWT_SECRET`, don't append password
+  const secret = process.env.JWT_SECRET;
+  const token = jwt.sign({ email: student.email, id: student._id }, secret, {
+    expiresIn: "15m",
+  });
+
+  const resetLink = `http://localhost:3000/api/users/reset-password/${student._id}/${token}`;
+  console.log("Generated Reset Link:", resetLink); // Debugging Log
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    tls: { rejectUnauthorized: false },
+  });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "Password Reset Request",
+    html: `
+          <h2>Password Reset</h2>
+          <p>Click the link below to reset your password:</p>
+          <a href="${resetLink}" target="_blank">${resetLink}</a>
+          <p>This link will expire in 15 minutes.</p>
+      `,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Email Error:", error);
+      return res.status(500).json({ msg: "Failed to send email", error: error.message });
+    }
+    console.log("Email sent:", info.response);
+    res.status(200).json({ success: true, message: "Password reset link sent!" });
+  });
+});
+
+exports.renderResetPage = asyncHandler(async (req, res, next) => {
+  const { id, token } = req.params;
+
+  console.log("Received Reset Request: ", { id, token });
+
+  const student = await Student.findById(id);
+  if (!student) {
+    return res.status(400).json({ msg: "User does not exist" });
+  }
+
+  const secret = process.env.JWT_SECRET; // ✅ Use the same secret
+  try {
+    const decoded = jwt.verify(token, secret);
+    console.log("Token Decoded Successfully:", decoded);
+
+    res.render("index", { email: decoded.email });
+  } catch (error) {
+    console.error("Token Verification Error:", error);
+    return res.status(400).json({ msg: "Invalid or expired token" });
+  }
+});
+
+
+exports.resetPassword = asyncHandler(async (req, res, next) => {
+  const { id, token } = req.params;
+  console.log("Received Password Reset Request:", { id, token });
+  console.log("Request Body:", req.body); // ✅ Debugging Log
+
+  // Extract password and confirmPassword correctly
+  const { password, "confirm-password": confirmPassword } = req.body; // ✅ Fix here
+
+  if (!password || !confirmPassword) {
+    console.log("Missing Fields!"); // Debugging log
+    return res.status(400).json({ msg: "Please enter all fields" });
+  }
+
+  if (password !== confirmPassword) {
+    console.log("Passwords Do Not Match!"); // Debugging log
+    return res.status(400).json({ msg: "Passwords do not match" });
+  }
+
+  const student = await Student.findOne({ _id: id });
+
+  if (!student) {
+    return res.status(400).json({ msg: "User does not exist" });
+  }
+
+  const secret = process.env.JWT_SECRET;
+  console.log("Secret Used for Verification:", secret);
+
+  try {
+    const decoded = jwt.verify(token, secret);
+    console.log("Token Verified Successfully:", decoded);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const updateResult = await Student.updateOne(
+      { _id: id },
+      { $set: { password: hashedPassword } }
+    );
+
+    if (updateResult.modifiedCount === 0) {
+      throw new Error("Password update failed in database.");
+    }
+
+    res.status(200).json({ msg: "Password updated successfully" });
+  } catch (error) {
+    console.error("Reset Password Error:", error);
+    res.status(500).json({ msg: "Invalid or expired token", error: error.message });
+  }
+});
+
 
 exports.getStudents = asyncHandler(async (req, res, next) => {
   const students = await Student.find({});
@@ -81,20 +208,40 @@ exports.login = asyncHandler(async (req, res, next) => {
 
 
 
-exports.updateStudent = asyncHandler(async (req, res, next) => {
-  const user = req.body;
-  const student = await Student.findByIdAndUpdate(req.params.id, user, {
-    new: true,
-    runValidators: true,
-  });
+// @desc    Update student profile
+// @route   PUT /api/v1/students/me
+// @access  Private
+exports.updateProfile = asyncHandler(async (req, res, next) => {
+  const student = await Student.findById(req.params.id);
 
   if (!student) {
-    return res.status(404).send({ message: "Student not found" });
+    return res.status(404).json({ success: false, message: "Student not found" });
   }
+
+  // Handle form data updates
+  Object.keys(req.body).forEach((key) => {
+    student[key] = req.body[key];
+  });
+
+  // Handle image upload
+  if (req.file) {
+    // Delete the old image if it exists
+    if (student.image) {
+      const oldImagePath = path.join(__dirname, "..", "public", "uploads", student.image);
+      fs.unlink(oldImagePath, (err) => {
+        if (err) console.log("Error deleting old image:", err);
+      });
+    }
+
+    // Save the new image
+    student.image = req.file.filename;
+  }
+
+  await student.save();
 
   res.status(200).json({
     success: true,
-    message: "Student updated successfully",
+    message: "Profile updated successfully",
     data: student,
   });
 });
@@ -114,27 +261,29 @@ exports.getMe = asyncHandler(async (req, res, next) => {
 // @access  Private
 
 exports.deleteStudent = asyncHandler(async (req, res, next) => {
-  console.log(req.params.id);
+  console.log(req.params.id); // Debugging log
   Student.findByIdAndDelete(req.params.id)
     .then((student) => {
-      if (student != null) {
-        var imagePath = path.join(
-          __dirname,
-          "..",
-          "public",
-          "uploads",
-          student.image
-        );
+      if (student) {
+        if (student.image) {  // ✅ Fix: Check if image exists before deleting
+          var imagePath = path.join(__dirname, "..", "public", "uploads", student.image);
 
-        fs.unlink(imagePath, (err) => {
-          if (err) {
-            console.log(err);
-          }
+          fs.unlink(imagePath, (err) => {
+            if (err) {
+              console.log("Error deleting image:", err);
+            }
+            res.status(200).json({
+              success: true,
+              message: "Student deleted successfully",
+            });
+          });
+        } else {
+          // ✅ If no image, delete student without fs.unlink()
           res.status(200).json({
             success: true,
             message: "Student deleted successfully",
           });
-        });
+        }
       } else {
         res.status(400).json({
           success: false,
@@ -149,6 +298,7 @@ exports.deleteStudent = asyncHandler(async (req, res, next) => {
       });
     });
 });
+
 
 // @desc Upload Single Image
 // @route POST /api/v1/auth/upload
@@ -200,3 +350,5 @@ const sendTokenResponse = (Student, statusCode, res, role, fullName, image, emai
 
     });
 };
+
+

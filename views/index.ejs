@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset</title>
+    <style>
+        /* Google Font */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Full Page Background */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #101F3F, #243B55);
+            color: white;
+        }
+
+        /* Form Container */
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 14px;
+            margin-bottom: 20px;
+            color: #e0e0e0;
+        }
+
+        /* Input Fields */
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            background: #f1f1f1;
+            outline: none;
+        }
+
+        input:focus {
+            border: 2px solid #00BFFF;
+        }
+
+        /* Submit Button */
+        .btn {
+            width: 100%;
+            background: #00BFFF;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: #008CBA;
+        }
+
+        /* Login Link */
+        .login-link {
+            display: block;
+            margin-top: 15px;
+            color: #00BFFF;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <h2>Reset Password</h2>
+        <p>Reset password for: <strong>
+                <%= email %>
+            </strong></p>
+
+        <form action="" method="POST">
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Enter new password" required>
+            </div>
+            <div class="input-group">
+                <input type="password" name="confirm-password" placeholder="Confirm new password" required>
+            </div>
+            <button type="submit" class="btn">Reset Password</button>
+        </form>
+
+        <a href="/login" class="login-link">Back to Login</a>
+    </div>
+</body>
+
+</html>
