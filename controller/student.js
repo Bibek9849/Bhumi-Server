@@ -261,29 +261,27 @@ exports.getMe = asyncHandler(async (req, res, next) => {
 // @access  Private
 
 exports.deleteStudent = asyncHandler(async (req, res, next) => {
-  console.log(req.params.id); // Debugging log
+  console.log(req.params.id);
   Student.findByIdAndDelete(req.params.id)
     .then((student) => {
-      if (student) {
-        if (student.image) {  // ✅ Fix: Check if image exists before deleting
-          var imagePath = path.join(__dirname, "..", "public", "uploads", student.image);
+      if (student != null) {
+        var imagePath = path.join(
+          __dirname,
+          "..",
+          "public",
+          "uploads",
+          student.image
+        );
 
-          fs.unlink(imagePath, (err) => {
-            if (err) {
-              console.log("Error deleting image:", err);
-            }
-            res.status(200).json({
-              success: true,
-              message: "Student deleted successfully",
-            });
-          });
-        } else {
-          // ✅ If no image, delete student without fs.unlink()
+        fs.unlink(imagePath, (err) => {
+          if (err) {
+            console.log(err);
+          }
           res.status(200).json({
             success: true,
             message: "Student deleted successfully",
           });
-        }
+        });
       } else {
         res.status(400).json({
           success: false,
@@ -298,7 +296,6 @@ exports.deleteStudent = asyncHandler(async (req, res, next) => {
       });
     });
 });
-
 
 // @desc Upload Single Image
 // @route POST /api/v1/auth/upload

@@ -4,10 +4,10 @@ const router = express.Router();
 const { authenticateToken, authorizeRole } = require("../security/auth");
 
 router.get("/", findAll);
-router.post("/", save);
-router.get("/:id", findbyId)
-router.delete("/:id", deletebyId)
-router.put("/:id", update)
+router.post("/", authenticateToken, save);
+router.get("/:id", authenticateToken, findbyId)
+router.delete("/:id", authenticateToken, deletebyId)
+router.put("/:id", authenticateToken, update)
 
 
 module.exports = router;

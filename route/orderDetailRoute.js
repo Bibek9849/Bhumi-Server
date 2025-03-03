@@ -5,7 +5,7 @@ const { authenticateToken, authorizeRole } = require("../security/auth");
 
 router.get("/", findAll);
 router.post("/save", authenticateToken, save);
-router.get("/:id", findbyId)
+router.get("/:id", authenticateToken, findbyId)
 router.delete("/:id", authenticateToken, deletebyId)
 router.put("/:id", authenticateToken, update)
 
