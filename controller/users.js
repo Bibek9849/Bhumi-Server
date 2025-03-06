@@ -1,5 +1,5 @@
 const asyncHandler = require("../middleware/async");
-const Student = require("../model/student");
+const Student = require("../model/users");
 const path = require("path");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
@@ -144,9 +144,6 @@ exports.getStudents = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc    Get single student
-// @route   GET /api/v1/students/:id
-// @access  Private
 
 exports.getStudent = asyncHandler(async (req, res, next) => {
   const student = await Student.findById(req.params.id);
@@ -162,9 +159,7 @@ exports.getStudent = asyncHandler(async (req, res, next) => {
   }
 });
 
-// @desc    Create new student
-// @route   POST /api/v1/students
-// @access  Public
+
 
 exports.register = asyncHandler(async (req, res, next) => {
   const student = await Student.findOne({ contact: req.body.data.contact });
@@ -182,9 +177,7 @@ exports.register = asyncHandler(async (req, res, next) => {
   });
 });
 
-// @desc   Login student
-// @route  POST /api/v1/students/login
-// @access Public
+
 
 exports.login = asyncHandler(async (req, res, next) => {
   const { contact, password } = req.body.data;
@@ -208,9 +201,6 @@ exports.login = asyncHandler(async (req, res, next) => {
 
 
 
-// @desc    Update student profile
-// @route   PUT /api/v1/students/me
-// @access  Private
 exports.updateProfile = asyncHandler(async (req, res, next) => {
   const studentId = req.params.id;
   let student = await Student.findById(studentId);
@@ -258,8 +248,6 @@ exports.updateProfile = asyncHandler(async (req, res, next) => {
 
 
 
-// Get current user
-// @access  Private
 
 exports.getStudent = asyncHandler(async (req, res, next) => {
   try {
@@ -287,9 +275,7 @@ exports.getStudent = asyncHandler(async (req, res, next) => {
 
 
 
-// @desc    Delete student
-// @route   DELETE /api/v1/students/:id
-// @access  Private
+
 
 exports.deleteStudent = asyncHandler(async (req, res, next) => {
   console.log(req.params.id);
@@ -328,9 +314,7 @@ exports.deleteStudent = asyncHandler(async (req, res, next) => {
     });
 });
 
-// @desc Upload Single Image
-// @route POST /api/v1/auth/upload
-// @access Private
+
 
 exports.uploadImage = asyncHandler(async (req, res, next) => {
   // // check for the file size and send an error message
@@ -394,9 +378,7 @@ const sendTokenResponse = (Student, statusCode, res) => {
 
 
 
-// @desc    Change student password
-// @route   PUT /api/v1/students/change-password/:id
-// @access  Private
+
 exports.changePassword = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const { currentPassword, newPassword } = req.body;

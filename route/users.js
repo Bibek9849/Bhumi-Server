@@ -14,7 +14,7 @@ const {
   deleteStudent,
   uploadImage,
   forgotPassword, resetPassword, renderResetPage
-} = require("../controller/student");
+} = require("../controller/users");
 
 router.post("/uploadImage", upload, uploadImage);
 router.post("/register", register);
