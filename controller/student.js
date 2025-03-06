@@ -212,20 +212,21 @@ exports.login = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/v1/students/me
 // @access  Private
 exports.updateProfile = asyncHandler(async (req, res, next) => {
-  const student = await Student.findById(req.params.id);
+  const studentId = req.params.id;
+  let student = await Student.findById(studentId);
 
   if (!student) {
     return res.status(404).json({ success: false, message: "Student not found" });
   }
 
-  // Handle form data updates
-  Object.keys(req.body).forEach((key) => {
-    student[key] = req.body[key];
-  });
+  // ✅ Update full name, email & contact if provided
+  if (req.body.fullName) student.fullName = req.body.fullName;
+  if (req.body.email) student.email = req.body.email;
+  if (req.body.contact) student.contact = req.body.contact;
 
-  // Handle image upload
+  // ✅ Handle Image Upload
   if (req.file) {
-    // Delete the old image if it exists
+    // Delete old image if exists
     if (student.image) {
       const oldImagePath = path.join(__dirname, "..", "public", "uploads", student.image);
       fs.unlink(oldImagePath, (err) => {
@@ -233,28 +234,58 @@ exports.updateProfile = asyncHandler(async (req, res, next) => {
       });
     }
 
-    // Save the new image
+    // Save new image filename
     student.image = req.file.filename;
   }
 
   await student.save();
 
+  // ✅ Send Updated Data Back
   res.status(200).json({
     success: true,
     message: "Profile updated successfully",
-    data: student,
+    data: {
+      id: student._id,
+      fullName: student.fullName,
+      email: student.email,
+      contact: student.contact,
+      profileImage: student.image
+        ? `http://10.0.2.2:3000/public/uploads/${student.image}`
+        : "https://i.pravatar.cc/150?img=3", // ✅ Full Image URL
+    },
   });
 });
+
+
 
 // Get current user
 // @access  Private
 
-exports.getMe = asyncHandler(async (req, res, next) => {
-  // Show current user and don't show the password
-  const student = await Student.findById(req.user.id).select("-password");
+exports.getStudent = asyncHandler(async (req, res, next) => {
+  try {
+    const student = await Student.findById(req.params.id);
 
-  res.status(200).json(student);
+    if (!student) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+
+    res.status(200).json({
+      success: true,
+      data: {
+        id: student._id,
+        fullName: student.fullName,
+        contact: student.contact,
+        email: student.email,
+        profileImage: student.image || "", // ✅ Send only the filename (or empty string if null)
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 });
+
+
 
 // @desc    Delete student
 // @route   DELETE /api/v1/students/:id
@@ -319,33 +350,79 @@ exports.uploadImage = asyncHandler(async (req, res, next) => {
 });
 
 // Get token from model , create cookie and send response
-const sendTokenResponse = (Student, statusCode, res, role, fullName, image, email, contact, id) => {
-  const token = Student.getSignedJwtToken();
+const sendTokenResponse = (Student, statusCode, res) => {
+
+  // ✅ Ensure contact is always sent
+  const contactNumber = Student.contact ? Student.contact : "Not Provided";
+
+  // ✅ Generate JWT Token
+  const token = jwt.sign(
+    {
+      id: Student._id,
+      email: Student.email,
+      role: Student.role,
+      fullName: Student.fullName,
+      contact: contactNumber, // ✅ Include contact in token
+      profileImage: Student.image, // ✅ Include full image URL in token
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "30d" }
+  );
 
   const options = {
-    //Cookie will expire in 30 days
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
   };
 
-  // Cookie security is false .if you want https then use this code. do not use in development time
   if (process.env.NODE_ENV === "proc") {
     options.secure = true;
   }
-  //we have created a cookie with a token
 
-  res
-    .status(statusCode)
-    .cookie("token", token, options) // key , value ,options
-    .json({
-      success: true,
-      token,
-      role,
-      fullName, email, contact, id, image,
-
-    });
+  // ✅ Send response with full image URL and contact
+  res.status(statusCode).cookie("token", token, options).json({
+    success: true,
+    token,
+    role: Student.role,
+    fullName: Student.fullName,
+    email: Student.email,
+    contact: contactNumber, // ✅ Always send contact
+    id: Student._id,
+  });
 };
 
 
+
+// @desc    Change student password
+// @route   PUT /api/v1/students/change-password/:id
+// @access  Private
+exports.changePassword = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    const student = await Student.findById(id);
+    if (!student) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Compare current password with stored hash
+    const isMatch = await bcrypt.compare(currentPassword, student.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect current password" });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update user password
+    student.password = hashedPassword;
+    await student.save();
+
+    res.status(200).json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Password Change Error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});

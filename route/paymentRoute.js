@@ -1,13 +1,12 @@
 const express = require("express");
 const { findAll, save, findbyId, deletebyId, update } = require("../controller/paymentController");
-const { authenticateToken } = require("../security/auth");
 const router = express.Router();
 
-router.get("/", authenticateToken, findAll);
-router.post("/", authenticateToken, save);
-router.get("/:id", authenticateToken, findbyId)
-router.delete("/:id", authenticateToken, deletebyId)
-router.put("/:id", authenticateToken, update)
+router.get("/", findAll);
+router.post("/", save);
+router.get("/:id", findbyId)
+router.delete("/:id", deletebyId)
+router.put("/:id", update)
 
 
 module.exports = router;
