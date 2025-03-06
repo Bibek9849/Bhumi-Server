@@ -13,7 +13,7 @@ const OrderDetailRouter = require("./route/orderDetailRoute");
 const FeedbackRouter = require("./route/feedbackRoute");
 const PaymentRouter = require("./route/paymentRoute");
 const AuthRouter = require("./route/authRoute");
-const auth = require("./route/student");
+const auth = require("./route/users");
 
 const app = express();
 
